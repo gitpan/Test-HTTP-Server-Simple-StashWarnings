@@ -5,7 +5,7 @@ use warnings;
 use base 'Test::HTTP::Server::Simple';
 
 use 5.008;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use NEXT;
 use Storable ();
@@ -49,8 +49,13 @@ sub setup {
     my $self = shift;
     my @copy = @_;
 
+    delete $self->{thss_test_path_hit};
+
     while (my ($item, $value) = splice @copy, 0, 2) {
         if ($item eq 'request_uri') {
+            # a little bit of canonicalization is okay I guess
+            $value =~ s{^/+}{/};
+
             $self->{thss_test_path_hit} = $value eq $self->test_warning_path;
         }
     }
@@ -137,6 +142,12 @@ the warnings. The warnings will be serialized. Use L<decode_warnings> to get
 the list of warnings seen so far (since last request anyway).
 
 Warnings are encoded using L<Storable> by default, but your subclass may override the C<encode_warnings> and C<decode_warnings> methods.
+
+=head1 TIPS
+
+Setting the C<TEST_VERBOSE> environment variable to a true value will cause
+warnings to be displayed immediately, even if they would be captured and tested
+later.
 
 =head1 AUTHOR
 
